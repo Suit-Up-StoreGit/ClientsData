@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path'); // Add this line
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,36 +20,15 @@ app.post('/measurements', (req, res) => {
     // Log the received data
     console.log('Received data from Shopify:', receivedData);
 
-    // Read existing data from measurements.json (if it exists)
-    try {
-        const filePath = 'measurements.json';
-        const existingData = fs.existsSync(filePath)
-            ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
-            : {};
+    // Generate a unique filename based on the current timestamp
+    const timestamp = Date.now();
+    const fileName = `Client_${timestamp}.json`;
 
-        // Update specific fields based on data from Shopify
-        existingData.Neck = receivedData.Neck;
-        existingData.Chest = receivedData.Chest;
-        existingData.Waist = receivedData.Waist;
-        existingData['Waist (at Belly Button)'] = receivedData['Waist (at Belly Button)'];
-        existingData['Back Length'] = receivedData['Back Length'];
-        existingData['Shoulder Width'] = receivedData['Shoulder Width'];
-        existingData['Sleeve Length'] = receivedData['Sleeve Length'];
-        existingData.Hip = receivedData.Hip;
-        existingData.Thigh = receivedData.Thigh;
-        existingData.Knee = receivedData.Knee;
-        existingData.Calf = receivedData.Calf;
-        existingData.Ankle = receivedData.Ankle;
-        existingData.Inseam = receivedData.Inseam;
+    // Write the data to the new file
+    fs.writeFileSync(path.join(__dirname, fileName), JSON.stringify(receivedData, null, 2));
 
-        // Write back to the file
-        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
-        console.log('Data successfully updated in measurements.json');
-        res.status(200).json({ message: 'Custom endpoint received the payload' });
-    } catch (error) {
-        console.error('Error updating measurements.json:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+    console.log(`Data successfully saved in ${fileName}`);
+    res.status(200).json({ message: 'Custom endpoint received the payload' });
 });
 
 // Start the server
