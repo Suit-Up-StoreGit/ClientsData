@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
-const path = require('path'); // Add this line
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +11,9 @@ app.use(express.json());
 
 // Use the cors middleware
 app.use(cors());
+
+// Initialize an empty object to store data
+let clientData = {};
 
 // Define your custom endpoint (e.g., /my-custom-endpoint)
 app.post('/measurements', (req, res) => {
@@ -26,8 +29,11 @@ app.post('/measurements', (req, res) => {
 
     // Write the data to the new file
     fs.writeFileSync(path.join(__dirname, fileName), JSON.stringify(receivedData, null, 2));
-
     console.log(`Data successfully saved in ${fileName}`);
+
+    // Store the data in the clientData object
+    clientData[fileName] = receivedData;
+
     res.status(200).json({ message: 'Custom endpoint received the payload' });
 });
 
