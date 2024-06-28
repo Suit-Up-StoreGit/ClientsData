@@ -12,9 +12,6 @@ app.use(express.json());
 // Use the cors middleware
 app.use(cors());
 
-// Initialize an empty object to store data
-let clientData = {};
-
 // Define your custom endpoint (e.g., /my-custom-endpoint)
 app.post('/measurements', (req, res) => {
     // Handle the payload sent to this endpoint (assuming you have the data in req.body)
@@ -27,12 +24,15 @@ app.post('/measurements', (req, res) => {
     const timestamp = Date.now();
     const fileName = `Client_${timestamp}.json`;
 
-    // Write the data to the new file
-    fs.writeFileSync(path.join(__dirname, fileName), JSON.stringify(receivedData, null, 2));
-    console.log(`Data successfully saved in ${fileName}`);
+    // Create the 'json' folder if it doesn't exist
+    const jsonFolderPath = path.join(__dirname, 'json');
+    if (!fs.existsSync(jsonFolderPath)) {
+        fs.mkdirSync(jsonFolderPath);
+    }
 
-    // Store the data in the clientData object
-    clientData[fileName] = receivedData;
+    // Write the data to the new file in the 'json' folder
+    fs.writeFileSync(path.join(jsonFolderPath, fileName), JSON.stringify(receivedData, null, 2));
+    console.log(`Data successfully saved in ${fileName}`);
 
     res.status(200).json({ message: 'Custom endpoint received the payload' });
 });
